@@ -1,6 +1,7 @@
 {
     "name": "croox/wp-dev-env-frame",
     "description": "??? some frame",
+    "version": "0.0.0",
     "license": "GNU General Public License v2 or later",
     "authors": [
         {
