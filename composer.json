@@ -1,0 +1,12 @@
+{
+    "name": "croox/wp-dev-env-frame",
+    "description": "??? some frame",
+    "license": "GNU General Public License v2 or later",
+    "authors": [
+        {
+            "name": "jhotadhari",
+            "email": "tellme@waterproof-webdesign.info"
+        }
+    ],
+    "require": {}
+}
