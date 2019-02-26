@@ -1,8 +1,8 @@
 <?php
 /**
- * Emk Childtheme init
+ * project init
  *
- * @package emk
+ * @package wde
  */
 
 // If this file is called directly, abort.
@@ -87,20 +87,21 @@ abstract class Wde_Project {
     	$this->slug = $init_args['slug'];
     	$this->name = $init_args['name'];
     	$this->prefix = $init_args['prefix'];
+    	$this->textdomain = $init_args['textdomain'];
 
     }
 
 	public function hooks() {}
 
 	protected function init_options() {
-		update_option( 'emk_version', $this->version );
-		add_option( 'emk_db_version', $this->db_version );
+		update_option( $this->prefix . '_version', $this->version );
+		add_option( $this->prefix . '_db_version', $this->db_version );
 	}
 
 	// check DB_VERSION and require the update class if necessary
 	protected function maybe_update() {
-		if ( get_option( 'emk_db_version' ) < $this->db_version ) {
-			// require_once( $this->get_dir_path() . 'inc/class-emk_update.php' );
+		if ( get_option( $this->prefix . '_db_version' ) < $this->db_version ) {
+			// require_once( $this->get_dir_path() . 'inc/class-' . $this->prefix . '_update.php' );
 			// new Emk_Update();
 			// class Emk_Update is missing ??? !!!
 		}
@@ -202,17 +203,21 @@ abstract class Wde_Project {
 
 	// include files to register post types and taxonomies
 	protected function register_post_types_and_taxs() {
-		if ( file_exists( $this->get_dir_path() . 'inc/emk_include_post_types_taxs.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/emk_include_post_types_taxs.php' );
-			emk_include_post_types_taxs();
+		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_post_types_taxs.php' ) ) {
+			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_post_types_taxs.php' );
+			$include_function = $this->prefix . 'include_post_types_taxs';
+			$include_function();
 		}
 	}
 
 	// include files to add user roles and capabilities
 	protected function add_roles_and_capabilities() {
-		if ( file_exists( $this->get_dir_path() . 'inc/emk_include_roles_capabilities.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/emk_include_roles_capabilities.php' );
-			if ( function_exists( 'emk_include_roles_capabilities' ) ) emk_include_roles_capabilities();
+		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_roles_capabilities.php' ) ) {
+			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_roles_capabilities.php' );
+			if ( function_exists( $this->prefix . '_include_roles_capabilities' ) ) {
+				$include_function = $this->prefix . 'include_roles_capabilities';
+				$include_function();
+			}
 		}
 	}
 
@@ -222,31 +227,24 @@ abstract class Wde_Project {
 			require_once $this->get_dir_path() . 'vendor/webdevstudios/cmb2/init.php';
 		}
 		// include template_functions and _tags
-		if ( file_exists( $this->get_dir_path() . 'inc/emk_include_fun.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/emk_include_fun.php' );
-			if ( function_exists( 'emk_include_fun' ) ) emk_include_fun();
-		}
-		if ( file_exists( $this->get_dir_path() . 'inc/emk_include_template_functions.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/emk_include_template_functions.php' );
-			if ( function_exists( 'emk_include_template_functions' ) ) emk_include_template_functions();
-		}
-		if ( file_exists( $this->get_dir_path() . 'inc/emk_include_template_tags.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/emk_include_template_tags.php' );
-			if ( function_exists( 'emk_include_template_tags' ) ) emk_include_template_tags();
+		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_fun.php' ) ) {
+			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_fun.php' );
+			if ( function_exists( $this->prefix . '_include_fun' ) ) {
+				$include_function = $this->prefix . 'include_fun';
+				$include_function();
+			}
 		}
 	}
 
 
 	abstract public function load_textdomain();
 
-
-
 	public function enqueue_styles(){}
 
 	public function enqueue_scripts(){}
 
 	public function enqueue_scripts_admin(){
-		// $handle = 'emk_script_admin';
+		// $handle = $this->prefix . '_script_admin';
 
 		// wp_register_script(
 		// 	$handle,
@@ -259,8 +257,8 @@ abstract class Wde_Project {
 		// 	)
 		// );
 
-		// wp_localize_script( $handle, 'emk_data', array() );
-		// wp_set_script_translations( $handle, 'emk', $this->get_dir_path() . 'languages' );
+		// wp_localize_script( $handle, $this->prefix . '_data', array() );
+		// wp_set_script_translations( $handle, $this->prefix . '', $this->get_dir_path() . 'languages' );
 		// wp_enqueue_script( $handle );
 	}
 

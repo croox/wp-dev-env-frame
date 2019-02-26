@@ -1,6 +1,6 @@
 <?php
 /**
- * Emk Childtheme init
+ * Theme init
  *
  * @package wde
  */
@@ -51,11 +51,11 @@ abstract class Wde_Theme extends Wde_Project {
 
 	public function load_textdomain(){
 		load_theme_textdomain(
-			'wde_replace_textDomain',
+			$this->textdomain,
 			$this->get_dir_path() . 'languages'
 		);
 		// just a test string to ensure generated pot file will not be empty
-		$test = __( 'test', 'emk' );
+		$test = __( 'test', $this->textdomain );
 	}
 
 	public function activate() {
@@ -72,12 +72,12 @@ abstract class Wde_Theme extends Wde_Project {
 			$this->add_roles_and_capabilities();
 
 			// hook the register post type functions, because init is to late
-			do_action( 'emk_on_activate_before_flush' );
+			do_action( $this->prefix . '_on_activate_before_flush' );
 			flush_rewrite_rules();
 			$this->maybe_update();
 
 			update_option( $option_key , 1 );
-			do_action( 'emk_theme_activated' );
+			do_action( $this->prefix . '_theme_activated' );
 
 		}
 
@@ -96,7 +96,28 @@ abstract class Wde_Theme extends Wde_Project {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_parent_styles' ), 10 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 100 );	// ??? if enfold 100
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
-		do_action( 'emk_theme_loaded' );
+		do_action( $this->prefix . '_theme_loaded' );
+	}
+
+
+	protected function auto_include() {
+        parent->auto_include();
+
+		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_functions.php' ) ) {
+			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_functions.php' );
+			if ( function_exists( $this->prefix . '_include_template_functions' ) ) {
+				$include_function = $this->prefix . 'include_template_functions';
+				$include_function();
+			}
+		}
+		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_tags.php' ) ) {
+			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_tags.php' );
+			if ( function_exists( $this->prefix . '_include_template_tags' ) ) {
+				$include_function = $this->prefix . 'include_template_tags';
+				$include_function();
+			}
+		}
+
 	}
 
 	public function enqueue_scripts(){
@@ -125,7 +146,7 @@ abstract class Wde_Theme extends Wde_Project {
 		delete_option( $option_key );
 
 		flush_rewrite_rules();
-		do_action( 'emk_theme_deactivated' );
+		do_action( $this->prefix . '_theme_deactivated' );
 	}
 
 
