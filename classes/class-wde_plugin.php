@@ -42,6 +42,7 @@ abstract class Wde_Plugin extends Wde_Project {
 	public function load_textdomain(){
 		load_plugin_textdomain(
 			$this->textdomain,
+			false,
 			$this->get_dir_basename() . '/languages'
 		);
 		// just a test string to ensure generated pot file will not be empty
@@ -68,7 +69,12 @@ abstract class Wde_Plugin extends Wde_Project {
 		}
 	}
 
-	public function on_deactivate() {
+	/*
+	 *
+	 * Doesn't have any parameters.
+	 * The Method inheritates from an abstract parent method, but actually no parameters will be passed.
+	 */
+	public function on_deactivate( $new_name, $new_theme, $old_theme ) {
 		$this->add_roles_and_capabilities();
 		do_action( $this->prefix . '_on_deactivate_before_flush' );
 		flush_rewrite_rules();

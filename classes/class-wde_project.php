@@ -201,41 +201,36 @@ abstract class Wde_Project {
 		return $this->FILE_CONST;				// theme file abs path
 	}
 
+	protected function _include( $key ) {
+		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php' ) ) {
+			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php' );
+			if ( function_exists( $this->prefix . '_include_' . $key . '' ) ) {
+				$include_function = $this->prefix . '_include_' . $key . '';
+				$include_function();
+			}
+		}
+	}
+
 	// include files to register post types and taxonomies
 	protected function register_post_types_and_taxs() {
-		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_post_types_taxs.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_post_types_taxs.php' );
-			$include_function = $this->prefix . 'include_post_types_taxs';
-			$include_function();
-		}
+		// include inc/post_types_taxs/*.php
+        $this->_include( 'post_types_taxs' );
 	}
 
 	// include files to add user roles and capabilities
 	protected function add_roles_and_capabilities() {
-		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_roles_capabilities.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_roles_capabilities.php' );
-			if ( function_exists( $this->prefix . '_include_roles_capabilities' ) ) {
-				$include_function = $this->prefix . 'include_roles_capabilities';
-				$include_function();
-			}
-		}
+		// include inc/roles_capabilities/*.php
+        $this->_include( 'roles_capabilities' );
 	}
 
-	protected function auto_include() {
+	public function auto_include() {
 		// init cmb2
 		if ( file_exists( $this->get_dir_path() . 'vendor/webdevstudios/cmb2/init.php' ) ) {
 			require_once $this->get_dir_path() . 'vendor/webdevstudios/cmb2/init.php';
 		}
-		// include template_functions and _tags
-		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_fun.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_fun.php' );
-			if ( function_exists( $this->prefix . '_include_fun' ) ) {
-				$include_function = $this->prefix . 'include_fun';
-				$include_function();
-			}
-		}
+		// include inc/fun/*.php
+        $this->_include( 'fun' );
 	}
-
 
 	abstract public function load_textdomain();
 
@@ -261,7 +256,6 @@ abstract class Wde_Project {
 		// wp_set_script_translations( $handle, $this->prefix . '', $this->get_dir_path() . 'languages' );
 		// wp_enqueue_script( $handle );
 	}
-
 
 	public function the_deactivate_notice(){
 		echo implode( '', array(
@@ -290,7 +284,5 @@ abstract class Wde_Project {
 	abstract public function deactivate();
 
 }
-
-
 
 ?>

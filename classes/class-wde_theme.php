@@ -99,25 +99,13 @@ abstract class Wde_Theme extends Wde_Project {
 		do_action( $this->prefix . '_theme_loaded' );
 	}
 
-
-	protected function auto_include() {
+	// ??? may be move to project
+	public function auto_include() {
         parent->auto_include();
-
-		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_functions.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_functions.php' );
-			if ( function_exists( $this->prefix . '_include_template_functions' ) ) {
-				$include_function = $this->prefix . 'include_template_functions';
-				$include_function();
-			}
-		}
-		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_tags.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_template_tags.php' );
-			if ( function_exists( $this->prefix . '_include_template_tags' ) ) {
-				$include_function = $this->prefix . 'include_template_tags';
-				$include_function();
-			}
-		}
-
+		// include inc/template_functions/*.php
+        $this->_include( 'template_functions' );
+		// include inc/template_tags/*.php
+        $this->_include( 'template_tags' );
 	}
 
 	public function enqueue_scripts(){
