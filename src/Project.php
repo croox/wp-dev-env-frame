@@ -225,8 +225,8 @@ abstract class Project {
 
 	public function auto_include() {
 		// init cmb2
-		if ( file_exists( $this->get_dir_path() . 'vendor/webdevstudios/cmb2/init.php' ) ) {
-			require_once $this->get_dir_path() . 'vendor/webdevstudios/cmb2/init.php';
+		if ( file_exists( $this->get_dir_path() . 'vendor/cmb2/cmb2/init.php' ) ) {
+			require_once $this->get_dir_path() . 'vendor/cmb2/cmb2/init.php';
 		}
 		// include inc/fun/*.php
         $this->_include( 'fun' );
