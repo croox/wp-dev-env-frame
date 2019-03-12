@@ -5,12 +5,14 @@
  * @package wde
  */
 
+namespace croox\wde;
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-abstract class Wde_Plugin extends Wde_Project {
+abstract class Plugin extends Project {
 
     function __construct( $init_args = array() ) {
         parent::__construct( $init_args );

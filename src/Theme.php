@@ -5,19 +5,18 @@
  * @package wde
  */
 
+namespace croox\wde;
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
 
-abstract class Wde_Theme extends Wde_Project {
-
-	protected $parent = '';	// ??? only child theme
+abstract class Theme extends Project {
 
     function __construct( $init_args = array() ) {
         parent::__construct( $init_args );
-
 
     	// parse init_args, apply defaults
     	$init_args = wp_parse_args( $init_args, array(
@@ -25,14 +24,10 @@ abstract class Wde_Theme extends Wde_Project {
 
 		// ??? is all exist and valid
 
-
 		$this->dir_basename = basename( dirname( $init_args['FILE_CONST'] ) );		// no trailing slash
 		$this->dir_url = get_theme_root_uri() . '/' . $this->dir_basename;			// no trailing slash
 		$this->dir_path = trailingslashit( dirname( $init_args['FILE_CONST'] ) );	// trailing slash
-		$this->FILE_CONST = $init_args['FILE_CONST'];								// file abs path
-
-		if ( array_key_exists( 'parent', $init_args ) )
-			$this->parent = $init_args['parent'];
+		$this->FILE_CONST = $init_args['FILE_CONST'];
 
     }
 
@@ -93,15 +88,18 @@ abstract class Wde_Theme extends Wde_Project {
 		$this->register_post_types_and_taxs();
 		$this->add_roles_and_capabilities();
 		$this->maybe_update();
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_parent_styles' ), 10 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 100 );	// ??? if enfold 100
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
+		$this->enqueue_assets();
 		do_action( $this->prefix . '_theme_loaded' );
+	}
+
+	protected function enqueue_assets() {
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 10 );	// ??? if enfold 100
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
 	}
 
 	// ??? may be move to project
 	public function auto_include() {
-        parent->auto_include();
+        parent::auto_include();
 		// include inc/template_functions/*.php
         $this->_include( 'template_functions' );
 		// include inc/template_tags/*.php
@@ -109,20 +107,21 @@ abstract class Wde_Theme extends Wde_Project {
 	}
 
 	public function enqueue_scripts(){
-		// if ( get_stylesheet_directory_uri() !== get_template_directory_uri() && is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		// 	wp_enqueue_script( 'comment-reply' );
-		// }
-	}
-
-	public function enqueue_parent_styles(){
-		// if theme is childtheme, enqueue parent style and set parent as dependency
-		if ( get_stylesheet_directory_uri() !== get_template_directory_uri() ) {
-			$parent_style = 'style';
-			wp_enqueue_style( 'style', get_template_directory_uri() . '/style.css' );
-			array_push( $this->style_deps, $parent_style );
+		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+			wp_enqueue_script( 'comment-reply' );
 		}
 	}
 
+	public function enqueue_styles(){
+		// // theme style.css, doesn't contain any style, just theme details
+		// // we don't need to enqueue it so. Just WP wants it to be existing
+		// wp_enqueue_style( $this->prefix, $this->get_dir_url() . '/style.css' );
+		// array_push($this->style_deps, $this->prefix );
+
+		// the 'real' theme stylesheet, contains the style
+		wp_enqueue_style( 'frontend', $this->get_dir_url() . '/css/frontend.min.css', $this->style_deps, false, 'all' );
+
+	}
 
 	public function on_deactivate( $new_name, $new_theme, $old_theme ) {
 

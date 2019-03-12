@@ -5,14 +5,14 @@
  * @package wde
  */
 
+namespace croox\wde;
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-
-
-abstract class Wde_Project {
+abstract class Project {
 
     private static $_instances = array();
 
@@ -238,24 +238,7 @@ abstract class Wde_Project {
 
 	public function enqueue_scripts(){}
 
-	public function enqueue_scripts_admin(){
-		// $handle = $this->prefix . '_script_admin';
-
-		// wp_register_script(
-		// 	$handle,
-		// 	$this->get_dir_url() . '/js/' . $handle  . '.min.js',
-		// 	array(
-		// 		'wp-hooks',
-		// 		'wp-api',
-		// 		'wp-data',
-		// 		'wp-i18n',
-		// 	)
-		// );
-
-		// wp_localize_script( $handle, $this->prefix . '_data', array() );
-		// wp_set_script_translations( $handle, $this->prefix . '', $this->get_dir_path() . 'languages' );
-		// wp_enqueue_script( $handle );
-	}
+	public function enqueue_scripts_admin(){}
 
 	public function the_deactivate_notice(){
 		echo implode( '', array(
