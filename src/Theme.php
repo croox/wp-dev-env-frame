@@ -15,21 +15,22 @@ if ( ! defined( 'WPINC' ) ) {
 
 abstract class Theme extends Project {
 
-    function __construct( $init_args = array() ) {
-        parent::__construct( $init_args );
+	function __construct( $init_args = array() ) {
+		parent::__construct( $init_args );
 
-    	// parse init_args, apply defaults
-    	$init_args = wp_parse_args( $init_args, array(
-		) );
+		// parse init_args, apply defaults
+		$init_args = wp_parse_args(
+			$init_args,
+			array()
+		);
 
 		// ??? is all exist and valid
+		$this->dir_basename = basename( dirname( $init_args['FILE_CONST'] ) );           // no trailing slash
+		$this->dir_url      = get_theme_root_uri() . '/' . $this->dir_basename;          // no trailing slash
+		$this->dir_path     = trailingslashit( dirname( $init_args['FILE_CONST'] ) );    // trailing slash
+		$this->FILE_CONST   = $init_args['FILE_CONST'];
 
-		$this->dir_basename = basename( dirname( $init_args['FILE_CONST'] ) );		// no trailing slash
-		$this->dir_url = get_theme_root_uri() . '/' . $this->dir_basename;			// no trailing slash
-		$this->dir_path = trailingslashit( dirname( $init_args['FILE_CONST'] ) );	// trailing slash
-		$this->FILE_CONST = $init_args['FILE_CONST'];
-
-    }
+	}
 
 	public function initialize() {
 
@@ -44,7 +45,7 @@ abstract class Theme extends Project {
 
 	}
 
-	public function load_textdomain(){
+	public function load_textdomain() {
 		load_theme_textdomain(
 			$this->textdomain,
 			$this->get_dir_path() . 'languages'
@@ -57,8 +58,9 @@ abstract class Theme extends Project {
 
 		$option_key = $this->slug . '_activated';
 
-		if ( ! $this->check_dependencies() )
+		if ( ! $this->check_dependencies() ) {
 			$this->deactivate();
+		}
 
 		if ( ! get_option( $option_key ) ) {
 
@@ -71,7 +73,7 @@ abstract class Theme extends Project {
 			flush_rewrite_rules();
 			$this->maybe_update();
 
-			update_option( $option_key , 1 );
+			update_option( $option_key, 1 );
 			do_action( $this->prefix . '_theme_activated' );
 
 		}
@@ -79,8 +81,9 @@ abstract class Theme extends Project {
 	}
 
 	public function start() {
-		if ( ! $this->check_dependencies() )
+		if ( ! $this->check_dependencies() ) {
 			$this->deactivate();
+		}
 
 		$this->auto_include();
 
@@ -93,31 +96,30 @@ abstract class Theme extends Project {
 	}
 
 	protected function enqueue_assets() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 10 );	// ??? if enfold 100
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ), 10 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
 	}
 
 	// ??? may be move to project
 	public function auto_include() {
-        parent::auto_include();
+		parent::auto_include();
 		// include inc/template_functions/*.php
-        $this->_include( 'template_functions' );
+		$this->_include( 'template_functions' );
 		// include inc/template_tags/*.php
-        $this->_include( 'template_tags' );
+		$this->_include( 'template_tags' );
 	}
 
-	public function enqueue_scripts(){
+	public function enqueue_scripts() {
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 			wp_enqueue_script( 'comment-reply' );
 		}
 	}
 
-	public function enqueue_styles(){
+	public function enqueue_styles() {
 		// // theme style.css, doesn't contain any style, just theme details
 		// // we don't need to enqueue it so. Just WP wants it to be existing
 		// wp_enqueue_style( $this->prefix, $this->get_dir_url() . '/style.css' );
 		// array_push($this->style_deps, $this->prefix );
-
 		// the 'real' theme stylesheet, contains the style
 		wp_enqueue_style( 'frontend', $this->get_dir_url() . '/css/frontend.min.css', $this->style_deps, false, 'all' );
 
@@ -125,8 +127,9 @@ abstract class Theme extends Project {
 
 	public function on_deactivate( $new_name, $new_theme, $old_theme ) {
 
-		if ( $old_theme->get_stylesheet() != $this->slug )
+		if ( $old_theme->get_stylesheet() != $this->slug ) {
 			return;
+		}
 
 		$option_key = $old_theme->get_stylesheet() . '_activated';
 
@@ -156,4 +159,4 @@ abstract class Theme extends Project {
 }
 
 
-?>
+

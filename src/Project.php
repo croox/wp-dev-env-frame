@@ -14,82 +14,85 @@ if ( ! defined( 'WPINC' ) ) {
 
 abstract class Project {
 
-    private static $_instances = array();
+	private static $_instances = array();
 
-    public static function get_instance( $init_args = array() ) {
-        $class = get_called_class();
-        if ( ! isset( self::$_instances[$class] ) ) {
-        	$new_class = new $class( $init_args );
-            self::$_instances[$class] = $new_class;
+	public static function get_instance( $init_args = array() ) {
+		$class = get_called_class();
+		if ( ! isset( self::$_instances[ $class ] ) ) {
+			$new_class                  = new $class( $init_args );
+			self::$_instances[ $class ] = $new_class;
 			$new_class->initialize();
 			$new_class->hooks();
-        }
-        return self::$_instances[$class];
-    }
+		}
+		return self::$_instances[ $class ];
+	}
 
 
 
 
-	protected $deps = array();
-	protected $version = '';
+	protected $deps       = array();
+	protected $version    = '';
 	protected $db_version = 0;
-	protected $slug = '';
-	protected $name = '';
-	protected $prefix = '';
+	protected $slug       = '';
+	protected $name       = '';
+	protected $prefix     = '';
 
-	protected $project_kind = '';
+	protected $project_kind      = '';
 	protected $deactivate_notice = '';
-	protected $dependencies_ok = false;
-	protected $style_deps = array();
+	protected $dependencies_ok   = false;
+	protected $style_deps        = array();
 
-	protected $dir_url = '';
-	protected $dir_path = '';
+	protected $dir_url      = '';
+	protected $dir_path     = '';
 	protected $dir_basename = '';
-	protected $FILE_CONST = '';
+	protected $FILE_CONST   = '';
 
 
-    function __construct( $init_args = array() ) {
+	function __construct( $init_args = array() ) {
 
-    	// parse init_args, apply defaults
-    	$init_args = wp_parse_args( $init_args, array(
+		// parse init_args, apply defaults
+		$init_args = wp_parse_args(
+			$init_args,
+			array(
 
-    		'deps' => array(
-				'plugins' => array(
-					/*
-					'woocommerce' => array(
-						'name'				=> 'WooCommerce',				// full name
-						'link'				=> 'https://woocommerce.com/',	// link
-						'ver_at_least'		=> '3.0.0',						// min version of required plugin
-						'ver_tested_up_to'	=> '3.2.1',						// tested with required plugin up to
-						'class'				=> 'WooCommerce',				// test by class
-						//'function'		=> 'WooCommerce',				// test by function
+				'deps' => array(
+					'plugins'     => array(
+						/*
+						'woocommerce' => array(
+							'name'              => 'WooCommerce',               // full name
+							'link'              => 'https://woocommerce.com/',  // link
+							'ver_at_least'      => '3.0.0',                     // min version of required plugin
+							'ver_tested_up_to'  => '3.2.1',                     // tested with required plugin up to
+							'class'             => 'WooCommerce',               // test by class
+							//'function'        => 'WooCommerce',               // test by function
+						),
+						*/
 					),
-					*/
-				),
-				'php_version' => 'wde_replace_phpRequiresAtLeast',			// required php version
-				'wp_version' => 'wde_replace_wpRequiresAtLeast',			// required wp version
-				'php_ext' => array(
-					/*
-					'xml' => array(
-						'name'				=> 'Xml',											// full name
-						'link'				=> 'http://php.net/manual/en/xml.installation.php',	// link
+					'php_version' => 'wde_replace_phpRequiresAtLeast',          // required php version
+					'wp_version'  => 'wde_replace_wpRequiresAtLeast',            // required wp version
+					'php_ext'     => array(
+						/*
+						'xml' => array(
+							'name'              => 'Xml',                                           // full name
+							'link'              => 'http://php.net/manual/en/xml.installation.php', // link
+						),
+						*/
 					),
-					*/
 				),
-			),
 
-		) );
+			)
+		);
 
 		// ??? is all exist and valid
-    	$this->deps = $init_args['deps'];
-    	$this->version = $init_args['version'];
-    	$this->db_version = $init_args['db_version'];
-    	$this->slug = $init_args['slug'];
-    	$this->name = $init_args['name'];
-    	$this->prefix = $init_args['prefix'];
-    	$this->textdomain = $init_args['textdomain'];
+		$this->deps       = $init_args['deps'];
+		$this->version    = $init_args['version'];
+		$this->db_version = $init_args['db_version'];
+		$this->slug       = $init_args['slug'];
+		$this->name       = $init_args['name'];
+		$this->prefix     = $init_args['prefix'];
+		$this->textdomain = $init_args['textdomain'];
 
-    }
+	}
 
 	public function hooks() {}
 
@@ -107,21 +110,21 @@ abstract class Project {
 		}
 	}
 
-	protected function check_dependencies(){
+	protected function check_dependencies() {
 
 		if ( ! $this->dependencies_ok ) {
 
 			$error_msgs = array();
 
 			// check php version
-			if ( version_compare( PHP_VERSION, $this->deps['php_version'], '<' ) ){
+			if ( version_compare( PHP_VERSION, $this->deps['php_version'], '<' ) ) {
 				$err_msg = sprintf( 'PHP version %s or higher', $this->deps['php_version'] );
 				array_push( $error_msgs, $err_msg );
 			}
 
 			// check php extensions
-			if ( array_key_exists( 'php_ext', $this->deps ) && is_array( $this->deps['php_ext'] ) ){
-				foreach ( $this->deps['php_ext'] as $php_ext_key => $php_ext_val ){
+			if ( array_key_exists( 'php_ext', $this->deps ) && is_array( $this->deps['php_ext'] ) ) {
+				foreach ( $this->deps['php_ext'] as $php_ext_key => $php_ext_val ) {
 					if ( ! extension_loaded( $php_ext_key ) ) {
 						$err_msg = sprintf(
 							'<a href="%s" target="_blank">%s</a> php extension to be installed',
@@ -135,15 +138,15 @@ abstract class Project {
 
 			// check wp version
 			// include an unmodified $wp_version
-			include( ABSPATH . WPINC . '/version.php' );
-			if ( version_compare( $wp_version, $this->deps['wp_version'], '<' ) ){
+			include ABSPATH . WPINC . '/version.php';
+			if ( version_compare( $wp_version, $this->deps['wp_version'], '<' ) ) {
 				$err_msg = sprintf( 'WordPress version %s or higher', $this->deps['wp_version'] );
 				array_push( $error_msgs, $err_msg );
 			}
 
 			// check plugin dependencies
-			if ( array_key_exists( 'plugins', $this->deps ) && is_array( $this->deps['plugins'] ) ){
-				foreach ( $this->deps['plugins'] as $dep_plugin ){
+			if ( array_key_exists( 'plugins', $this->deps ) && is_array( $this->deps['plugins'] ) ) {
+				foreach ( $this->deps['plugins'] as $dep_plugin ) {
 					$err_msg = sprintf(
 						' <a href="%s" target="_blank">%s</a> Plugin version %s (tested up to %s)',
 						$dep_plugin['link'],
@@ -152,28 +155,37 @@ abstract class Project {
 						$dep_plugin['ver_tested_up_to']
 					);
 					// check by class
-					if ( array_key_exists( 'class', $dep_plugin ) && strlen( $dep_plugin['class'] ) > 0 ){
+					if ( array_key_exists( 'class', $dep_plugin ) && strlen( $dep_plugin['class'] ) > 0 ) {
 						if ( ! class_exists( $dep_plugin['class'] ) ) {
 							array_push( $error_msgs, $err_msg );
 						}
 					}
 					// check by function
-					if ( array_key_exists( 'function', $dep_plugin ) && strlen( $dep_plugin['function'] ) > 0 ){
+					if ( array_key_exists( 'function', $dep_plugin ) && strlen( $dep_plugin['function'] ) > 0 ) {
 						if ( ! function_exists( $dep_plugin['function'] ) ) {
-							array_push( $error_msgs, $err_msg);
+							array_push( $error_msgs, $err_msg );
 						}
 					}
 				}
 			}
 
 			// maybe set deactivate_notice and return false
-			if ( count( $error_msgs ) > 0 ){
-				$this->deactivate_notice = implode( '', array(
-					'<h3>',$this->name,' ',$this->project_kind,' requires:</h3>',
-					'<ul style="padding-left: 1em; list-style: inside disc;">',
-						'<li>',implode ( '</li><li>' , $error_msgs ),'</li>',
-					'</ul>',
-				) );
+			if ( count( $error_msgs ) > 0 ) {
+				$this->deactivate_notice = implode(
+					'',
+					array(
+						'<h3>',
+						$this->name,
+						' ',
+						$this->project_kind,
+						' requires:</h3>',
+						'<ul style="padding-left: 1em; list-style: inside disc;">',
+						'<li>',
+						implode( '</li><li>', $error_msgs ),
+						'</li>',
+						'</ul>',
+					)
+				);
 				return false;
 			}
 
@@ -185,25 +197,25 @@ abstract class Project {
 
 	abstract public function initialize();
 
-	public function get_dir_url(){
-		return $this->dir_url;					// no trailing slash
+	public function get_dir_url() {
+		return $this->dir_url;                  // no trailing slash
 	}
 
-	public function get_dir_path(){
-		return $this->dir_path;					// trailing slash
+	public function get_dir_path() {
+		return $this->dir_path;                 // trailing slash
 	}
 
-	public function get_dir_basename(){
-		return $this->dir_basename;				// no trailing slash
+	public function get_dir_basename() {
+		return $this->dir_basename;             // no trailing slash
 	}
 
-	public function get_file(){
-		return $this->FILE_CONST;				// theme file abs path
+	public function get_file() {
+		return $this->FILE_CONST;               // theme file abs path
 	}
 
 	protected function _include( $key ) {
 		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php' ) ) {
-			include_once( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php' );
+			include_once $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php';
 			if ( function_exists( $this->prefix . '_include_' . $key . '' ) ) {
 				$include_function = $this->prefix . '_include_' . $key . '';
 				$include_function();
@@ -214,13 +226,13 @@ abstract class Project {
 	// include files to register post types and taxonomies
 	protected function register_post_types_and_taxs() {
 		// include inc/post_types_taxs/*.php
-        $this->_include( 'post_types_taxs' );
+		$this->_include( 'post_types_taxs' );
 	}
 
 	// include files to add user roles and capabilities
 	protected function add_roles_and_capabilities() {
 		// include inc/roles_capabilities/*.php
-        $this->_include( 'roles_capabilities' );
+		$this->_include( 'roles_capabilities' );
 	}
 
 	public function auto_include() {
@@ -229,7 +241,7 @@ abstract class Project {
 			require_once $this->get_dir_path() . 'vendor/cmb2/cmb2/init.php';
 		}
 		// include inc/fun/*.php
-        $this->_include( 'fun' );
+		$this->_include( 'fun' );
 	}
 
 	abstract public function load_textdomain();
@@ -238,24 +250,32 @@ abstract class Project {
 
 	public function enqueue_scripts(){}
 
-	public function enqueue_scripts_admin(){}
-
-	public function the_deactivate_notice(){
-		echo implode( '', array(
-			'<div class="notice error">',
+	public function the_deactivate_notice() {
+		echo implode(
+			'',
+			array(
+				'<div class="notice error">',
 				$this->deactivate_notice,
-				'<p>The ',$this->project_kind,' will be deactivated.</p>',
-			'</div>',
-		) );
+				'<p>The ',
+				$this->project_kind,
+				' will be deactivated.</p>',
+				'</div>',
+			)
+		);
 	}
 
-	public function the_deactivate_error_notice(){
-		echo implode( '', array(
-			'<div class="notice error">',
+	public function the_deactivate_error_notice() {
+		echo implode(
+			'',
+			array(
+				'<div class="notice error">',
 				$this->deactivate_notice,
-				'<p>An error occurred when deactivating the ',$this->project_kind,'. It needs to be deactivated manually.</p>',
-			'</div>',
-		) );
+				'<p>An error occurred when deactivating the ',
+				$this->project_kind,
+				'. It needs to be deactivated manually.</p>',
+				'</div>',
+			)
+		);
 	}
 
 	abstract public function activate();
@@ -268,4 +288,4 @@ abstract class Project {
 
 }
 
-?>
+

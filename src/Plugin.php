@@ -14,21 +14,21 @@ if ( ! defined( 'WPINC' ) ) {
 
 abstract class Plugin extends Project {
 
-    function __construct( $init_args = array() ) {
-        parent::__construct( $init_args );
+	function __construct( $init_args = array() ) {
+		parent::__construct( $init_args );
 
-
-    	// parse init_args, apply defaults
-    	$init_args = wp_parse_args( $init_args, array(
-		) );
+		// parse init_args, apply defaults
+		$init_args = wp_parse_args(
+			$init_args,
+			array()
+		);
 
 		// ??? is all exist and valid
-
-		$this->dir_basename = basename( dirname( $init_args['FILE_CONST'] ) );		// no trailing slash
-		$this->dir_url = plugins_url( '', $init_args['FILE_CONST'] );				// no trailing slash
-		$this->dir_path = plugin_dir_path( $init_args['FILE_CONST'] );				// trailing slash
-		$this->FILE_CONST = $init_args['FILE_CONST'];								// file abs path
-    }
+		$this->dir_basename = basename( dirname( $init_args['FILE_CONST'] ) );      // no trailing slash
+		$this->dir_url      = plugins_url( '', $init_args['FILE_CONST'] );          // no trailing slash
+		$this->dir_path     = plugin_dir_path( $init_args['FILE_CONST'] );          // trailing slash
+		$this->FILE_CONST   = $init_args['FILE_CONST'];                             // file abs path
+	}
 
 	public function initialize() {
 
@@ -41,7 +41,7 @@ abstract class Plugin extends Project {
 		add_action( 'plugins_loaded', array( $this, 'start' ), 9 );
 	}
 
-	public function load_textdomain(){
+	public function load_textdomain() {
 		load_plugin_textdomain(
 			$this->textdomain,
 			false,
@@ -52,7 +52,7 @@ abstract class Plugin extends Project {
 	}
 
 	public function activate() {
-		if ( $this->check_dependencies() ){
+		if ( $this->check_dependencies() ) {
 			$this->init_options();
 			$this->register_post_types_and_taxs();
 			$this->add_roles_and_capabilities();
@@ -88,10 +88,10 @@ abstract class Plugin extends Project {
 	}
 
 	public function start() {
-		if ( $this->check_dependencies() ){
+		if ( $this->check_dependencies() ) {
 			add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
 			$this->register_post_types_and_taxs();
-			$this->maybe_update();	// I think mass a plugin update does not run activation hooks
+			$this->maybe_update();  // I think mass a plugin update does not run activation hooks
 			add_action( 'plugins_loaded', array( $this, 'auto_include' ) );
 			do_action( $this->prefix . '_plugin_loaded' );
 		} else {
@@ -105,13 +105,5 @@ abstract class Plugin extends Project {
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 	}
 
-	// public function enqueue_scripts(){
-	// 	// if ( get_stylesheet_directory_uri() !== get_template_directory_uri() && is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-	// 	// 	wp_enqueue_script( 'comment-reply' );
-	// 	// }
-	// }
-
 }
 
-
-?>

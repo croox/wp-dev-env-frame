@@ -14,7 +14,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 abstract class Childtheme_Enfold extends Childtheme {
 
-	public function enqueue_styles(){
+	public function enqueue_styles() {
 
 		if ( defined( $this->parent ) && 'enfold' === $this->parent && get_stylesheet_directory_uri() !== get_template_directory_uri() ) {
 			// if parent is enfold we need to deregister the child style.css again
