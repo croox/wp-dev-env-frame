@@ -36,6 +36,7 @@ abstract class Project {
 	protected $slug       = '';
 	protected $name       = '';
 	protected $prefix     = '';
+	protected $textdomain     = '';
 
 	protected $project_kind      = '';
 	protected $deactivate_notice = '';
@@ -213,6 +214,14 @@ abstract class Project {
 		return $this->FILE_CONST;               // theme file abs path
 	}
 
+	public function get_prefix() {
+		return $this->prefix;
+	}
+
+	public function get_textdomain() {
+		return $this->textdomain;
+	}
+
 	protected function _include( $key ) {
 		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php' ) ) {
 			include_once $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php';
@@ -245,10 +254,6 @@ abstract class Project {
 	}
 
 	abstract public function load_textdomain();
-
-	public function enqueue_styles(){}
-
-	public function enqueue_scripts(){}
 
 	public function the_deactivate_notice() {
 		echo implode(
