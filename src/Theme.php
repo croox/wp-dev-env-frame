@@ -121,7 +121,8 @@ abstract class Theme extends Project {
 		// wp_enqueue_style( $this->prefix, $this->get_dir_url() . '/style.css' );
 		// array_push($this->style_deps, $this->prefix );
 		// the 'real' theme stylesheet, contains the style
-		wp_enqueue_style( 'frontend', $this->get_dir_url() . '/css/frontend.min.css', $this->style_deps, false, 'all' );
+		$handle = $this->prefix . '_frontend';
+		wp_enqueue_style( $handle, $this->get_dir_url() . '/css/' . $handle . '.min.css', $this->style_deps, false, 'all' );
 
 	}
 
