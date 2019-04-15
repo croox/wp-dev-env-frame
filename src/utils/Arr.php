@@ -41,7 +41,7 @@ class Arr {
 
 		if ( count( $path_arr ) > 1 && strlen( $path_arr[1] ) > 0 ) {
 			return is_array( $array[ $path_arr[0] ] )
-				? expa_array_get(
+				? static::get(
 					$array[ $path_arr[0] ],
 					implode( '.', array_slice( $path_arr, 1 ) ),
 					$default

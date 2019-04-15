@@ -54,4 +54,37 @@ class Attachment {
 		return $attachment[0];
 	}
 
+	/**
+	 * Get an HTML img element for given url
+	 *
+	 * If attachment is found for given url,
+	 * `wp_get_attachment_image` will be used to get the html tag (uses `$size` and `$attr`),
+ 	 * otherwise url is wrapped in img tag with given atts.
+	 *
+	 * @param string $url		The URL of the image (ex: http://mysite.com/wp-content/uploads/2013/05/test-image.jpg)
+	 * @param string $size 		(Optional) Image size
+	 * @param array $attr 		(Optional) Attributes for the image markup.
+	 * @return string 			HTML img element or empty string on failure.
+	 */
+	public static function get_image_by_url( $url, $size = 'thumbnail', $attr = array() ){
+		if ( strlen( $url ) === 0 )
+			return '';
+
+		$id = static::get_id_by_url( $url );
+
+		if ( is_int( $id ) ) {
+			$image = wp_get_attachment_image( $id, $size, $attr )[0];
+		} else {
+			$attr = array_map( 'esc_attr', $attr );
+			$image = '<img';
+			$image .= ' src="' . esc_url( $url ) . '"';
+			foreach ( $attr as $name => $value ) {
+				$image .= ' ' . $name . '=' . '"' . $value . '"';
+			}
+			$image .= ' />';
+		}
+
+		return $image;
+	}
+
 }
