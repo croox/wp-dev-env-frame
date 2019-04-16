@@ -1,6 +1,6 @@
 <?php
 /**
- * Emk Childtheme init
+ * Childtheme init
  *
  * @package wde
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Emk plugin init
+ * plugin init
  *
  * @package wde
  */

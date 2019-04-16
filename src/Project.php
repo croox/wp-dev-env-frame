@@ -106,8 +106,8 @@ abstract class Project {
 	protected function maybe_update() {
 		if ( get_option( $this->prefix . '_db_version' ) < $this->db_version ) {
 			// require_once( $this->get_dir_path() . 'inc/class-' . $this->prefix . '_update.php' );
-			// new Emk_Update();
-			// class Emk_Update is missing ??? !!!
+			// new Update();
+			// class Update is missing ??? !!!
 		}
 	}
 
