@@ -52,7 +52,7 @@ abstract class Theme_Twentynineteen extends Theme {
 	public function enqueue_styles(){
         parent::enqueue_styles();
 
-		wp_enqueue_style( $this->prefix . '-print-style', $this->get_dir_url() . '/css/print.min.css', array(), wp_get_theme()->get( 'Version' ), 'print' );
+		wp_enqueue_style( $this->prefix . '-print-style', $this->dir_url . '/css/print.min.css', array(), wp_get_theme()->get( 'Version' ), 'print' );
 	}
 
 	/**
@@ -62,8 +62,8 @@ abstract class Theme_Twentynineteen extends Theme {
         parent::enqueue_scripts();
 
 		if ( has_nav_menu( 'menu-1' ) ) {
-			wp_enqueue_script( $this->prefix . '-priority-menu', $this->get_dir_url() . '/js/priority_menu.min.js', array(), '1.1', true );
-			wp_enqueue_script( $this->prefix . '-touch-navigation', $this->get_dir_url() . '/js/touch_keyboard_navigation.min.js', array(), '1.1', true );
+			wp_enqueue_script( $this->prefix . '-priority-menu', $this->dir_url . '/js/priority_menu.min.js', array(), '1.1', true );
+			wp_enqueue_script( $this->prefix . '-touch-navigation', $this->dir_url . '/js/touch_keyboard_navigation.min.js', array(), '1.1', true );
 		}
 	}
 
@@ -89,7 +89,7 @@ abstract class Theme_Twentynineteen extends Theme {
 	 */
 	public function editor_customizer_styles() {
 
-		wp_enqueue_style( $this->prefix . '-editor-customizer-styles', $this->get_dir_url() . '/css/style_editor_customizer.min.css', false, '1.1', 'all' );
+		wp_enqueue_style( $this->prefix . '-editor-customizer-styles', $this->dir_url . '/css/style_editor_customizer.min.css', false, '1.1', 'all' );
 
 		if ( 'custom' === get_theme_mod( 'primary_color' ) ) {
 			wp_add_inline_style( $this->prefix . '-editor-customizer-styles', $this->custom_colors_css() );
@@ -149,9 +149,9 @@ abstract class Theme_Twentynineteen extends Theme {
 		// This theme uses wp_nav_menu() in two locations.
 		register_nav_menus(
 			array(
-				'menu-1' => __( 'Primary', $this->get_textdomain() ),
-				'footer' => __( 'Footer Menu', $this->get_textdomain() ),
-				'social' => __( 'Social Links Menu', $this->get_textdomain() ),
+				'menu-1' => __( 'Primary', $this->textdomain ),
+				'footer' => __( 'Footer Menu', $this->textdomain ),
+				'social' => __( 'Social Links Menu', $this->textdomain ),
 			)
 		);
 
@@ -205,26 +205,26 @@ abstract class Theme_Twentynineteen extends Theme {
 			'editor-font-sizes',
 			array(
 				array(
-					'name'      => __( 'Small', $this->get_textdomain() ),
-					'shortName' => __( 'S', $this->get_textdomain() ),
+					'name'      => __( 'Small', $this->textdomain ),
+					'shortName' => __( 'S', $this->textdomain ),
 					'size'      => 19.5,
 					'slug'      => 'small',
 				),
 				array(
-					'name'      => __( 'Normal', $this->get_textdomain() ),
-					'shortName' => __( 'M', $this->get_textdomain() ),
+					'name'      => __( 'Normal', $this->textdomain ),
+					'shortName' => __( 'M', $this->textdomain ),
 					'size'      => 22,
 					'slug'      => 'normal',
 				),
 				array(
-					'name'      => __( 'Large', $this->get_textdomain() ),
-					'shortName' => __( 'L', $this->get_textdomain() ),
+					'name'      => __( 'Large', $this->textdomain ),
+					'shortName' => __( 'L', $this->textdomain ),
 					'size'      => 36.5,
 					'slug'      => 'large',
 				),
 				array(
-					'name'      => __( 'Huge', $this->get_textdomain() ),
-					'shortName' => __( 'XL', $this->get_textdomain() ),
+					'name'      => __( 'Huge', $this->textdomain ),
+					'shortName' => __( 'XL', $this->textdomain ),
 					'size'      => 49.5,
 					'slug'      => 'huge',
 				),
@@ -236,27 +236,27 @@ abstract class Theme_Twentynineteen extends Theme {
 			'editor-color-palette',
 			array(
 				array(
-					'name'  => __( 'Primary', $this->get_textdomain() ),
+					'name'  => __( 'Primary', $this->textdomain ),
 					'slug'  => 'primary',
 					'color' => utils\Color::hsl_to_hex( 'default' === get_theme_mod( 'primary_color' ) ? 199 : get_theme_mod( 'primary_color_hue', 199 ), 100, 33 ),
 				),
 				array(
-					'name'  => __( 'Secondary', $this->get_textdomain() ),
+					'name'  => __( 'Secondary', $this->textdomain ),
 					'slug'  => 'secondary',
 					'color' => utils\Color::hsl_to_hex( 'default' === get_theme_mod( 'primary_color' ) ? 199 : get_theme_mod( 'primary_color_hue', 199 ), 100, 23 ),
 				),
 				array(
-					'name'  => __( 'Dark Gray', $this->get_textdomain() ),
+					'name'  => __( 'Dark Gray', $this->textdomain ),
 					'slug'  => 'dark-gray',
 					'color' => '#111',
 				),
 				array(
-					'name'  => __( 'Light Gray', $this->get_textdomain() ),
+					'name'  => __( 'Light Gray', $this->textdomain ),
 					'slug'  => 'light-gray',
 					'color' => '#767676',
 				),
 				array(
-					'name'  => __( 'White', $this->get_textdomain() ),
+					'name'  => __( 'White', $this->textdomain ),
 					'slug'  => 'white',
 					'color' => '#FFF',
 				),

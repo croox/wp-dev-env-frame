@@ -48,7 +48,6 @@ abstract class Project {
 	protected $dir_basename = '';
 	protected $FILE_CONST   = '';
 
-
 	function __construct( $init_args = array() ) {
 
 		// parse init_args, apply defaults
@@ -105,7 +104,7 @@ abstract class Project {
 	// check DB_VERSION and require the update class if necessary
 	protected function maybe_update() {
 		if ( get_option( $this->prefix . '_db_version' ) < $this->db_version ) {
-			// require_once( $this->get_dir_path() . 'inc/class-' . $this->prefix . '_update.php' );
+			// require_once( $this->dir_path . 'inc/class-' . $this->prefix . '_update.php' );
 			// new Update();
 			// class Update is missing ??? !!!
 		}
@@ -198,33 +197,67 @@ abstract class Project {
 
 	abstract public function initialize();
 
+	/**
+	 * Public getter method for retrieving protected/private variables
+	 * @param  string  		$field Field to retrieve
+	 * @return mixed        Field value or exception is thrown
+	 */
+	public function __get( $field ) {
+		// Allowed fields to retrieve
+		if ( in_array( $field, array(
+			'version',
+			'slug',
+			'name',
+			'prefix',
+			'textdomain',
+			'dir_url',
+			'dir_path',
+			'dir_basename',
+			'FILE_CONST',
+		), true ) ) {
+			return $this->{$field};
+		}
+
+		throw new Exception( 'Invalid property: ' . $field );
+	}
+
 	public function get_dir_url() {
+		error_log( 'get_dir_url() is deprecated. Use public getter method ->dir_url instead' );
 		return $this->dir_url;                  // no trailing slash
 	}
 
 	public function get_dir_path() {
+		error_log( 'get_dir_path() is deprecated. Use public getter method ->dir_path instead' );
 		return $this->dir_path;                 // trailing slash
 	}
 
 	public function get_dir_basename() {
+		error_log( 'get_dir_basename() is deprecated. Use public getter method ->dir_basename instead' );
 		return $this->dir_basename;             // no trailing slash
 	}
 
 	public function get_file() {
+		error_log( 'get_file() is deprecated. Use public getter method ->FILE_CONST instead' );
 		return $this->FILE_CONST;               // theme file abs path
 	}
 
 	public function get_prefix() {
+		error_log( 'get_prefix() is deprecated. Use public getter method ->prefix instead' );
 		return $this->prefix;
 	}
 
 	public function get_textdomain() {
+		error_log( 'get_textdomain() is deprecated. Use public getter method ->textdomain instead' );
 		return $this->textdomain;
+	}
+	public function get_version() {
+		error_log( 'get_version() is deprecated. Use public getter method ->version instead' );
+		return $this->version;
 	}
 
 	protected function _include( $key ) {
-		if ( file_exists( $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php' ) ) {
-			include_once $this->get_dir_path() . 'inc/' . $this->prefix . '_include_' . $key . '.php';
+		if ( file_exists( $this->dir_path . 'inc/' . $this->prefix . '_include_' . $key . '.php' ) ) {
+			include_once $this->dir_path . 'inc/' . $this->prefix . '_include_' . $key . '.php';
 			if ( function_exists( $this->prefix . '_include_' . $key . '' ) ) {
 				$include_function = $this->prefix . '_include_' . $key . '';
 				$include_function();

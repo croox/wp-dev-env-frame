@@ -45,7 +45,7 @@ abstract class Plugin extends Project {
 		load_plugin_textdomain(
 			$this->textdomain,
 			false,
-			$this->get_dir_basename() . '/languages'
+			$this->dir_basename . '/languages'
 		);
 		// just a test string to ensure generated pot file will not be empty
 		$test = __( 'test', $this->textdomain );

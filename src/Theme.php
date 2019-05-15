@@ -48,7 +48,7 @@ abstract class Theme extends Project {
 	public function load_textdomain() {
 		load_theme_textdomain(
 			$this->textdomain,
-			$this->get_dir_path() . 'languages'
+			$this->dir_path . 'languages'
 		);
 		// just a test string to ensure generated pot file will not be empty
 		$test = __( 'test', $this->textdomain );
@@ -118,12 +118,15 @@ abstract class Theme extends Project {
 	public function enqueue_styles() {
 		// // theme style.css, doesn't contain any style, just theme details
 		// // we don't need to enqueue it so. Just WP wants it to be existing
-		// wp_enqueue_style( $this->prefix, $this->get_dir_url() . '/style.css' );
+		// wp_enqueue_style( $this->prefix, $this->dir_url . '/style.css' );
 		// array_push($this->style_deps, $this->prefix );
+
 		// the 'real' theme stylesheet, contains the style
 		$handle = $this->prefix . '_frontend';
-		wp_enqueue_style( $handle, $this->get_dir_url() . '/css/' . $handle . '.min.css', $this->style_deps, false, 'all' );
-
+		$_src = '/css/' . $handle . '.min.css';
+		$src = $this->dir_url . $_src;
+		$ver = $this->version . '.' . filemtime( $this->dir_path . $_src );
+		wp_enqueue_style( $handle, $src, $this->style_deps, $ver, 'all' );
 	}
 
 	public function on_deactivate( $new_name, $new_theme, $old_theme ) {
