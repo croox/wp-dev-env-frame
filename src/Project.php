@@ -50,41 +50,21 @@ abstract class Project {
 
 	function __construct( $init_args = array() ) {
 
-		// parse init_args, apply defaults
-		$init_args = wp_parse_args(
-			$init_args,
-			array(
-
-				'deps' => array(
-					'plugins'     => array(
-						/*
-						'woocommerce' => array(
-							'name'              => 'WooCommerce',               // full name
-							'link'              => 'https://woocommerce.com/',  // link
-							'ver_at_least'      => '3.0.0',                     // min version of required plugin
-							'ver_tested_up_to'  => '3.2.1',                     // tested with required plugin up to
-							'class'             => 'WooCommerce',               // test by class
-							//'function'        => 'WooCommerce',               // test by function
-						),
-						*/
-					),
-					'php_version' => 'wde_replace_phpRequiresAtLeast',          // required php version
-					'wp_version'  => 'wde_replace_wpRequiresAtLeast',            // required wp version
-					'php_ext'     => array(
-						/*
-						'xml' => array(
-							'name'              => 'Xml',                                           // full name
-							'link'              => 'http://php.net/manual/en/xml.installation.php', // link
-						),
-						*/
-					),
-				),
-
-			)
+		$deps = array(
+			'plugins' => array_key_exists( 'plugins', $init_args['deps'] ) && is_array( $init_args['deps']['plugins'] )
+				? $init_args['deps']['plugins']
+				: array(),
+			'php_ext' => array_key_exists( 'php_ext', $init_args['deps'] ) && is_array( $init_args['deps']['php_ext'] )
+				? $init_args['deps']['php_ext']
+				: array(),
 		);
+		if ( array_key_exists( 'php_version', $init_args['deps'] ) && is_string( $init_args['deps']['php_version'] ) )
+			$deps['php_version'] = $init_args['deps']['php_version'];
+		if ( array_key_exists( 'wp_version', $init_args['deps'] ) && is_string( $init_args['deps']['wp_version'] ) )
+			$deps['wp_version'] = $init_args['deps']['wp_version'];
 
 		// ??? is all exist and valid
-		$this->deps       = $init_args['deps'];
+		$this->deps       = $deps;
 		$this->version    = $init_args['version'];
 		$this->db_version = $init_args['db_version'];
 		$this->slug       = $init_args['slug'];
