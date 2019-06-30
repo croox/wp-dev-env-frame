@@ -47,6 +47,8 @@ class Wpml {
 	* Switches wpml global language for rest requests from post-edit.
 	* Determinates new language based on referer language.
 	*
+	* Fix this issue https://wpml.org/forums/topic/gutenberg-editor-sidebar-taxonomy-panels-load-wrong-language/
+	*
 	* Can/Should be used in combination with `call_rest_switch_language_by_tax`
 	* to hook into `rest_{$taxonomy}_query` for all taxonomies.
 	*
