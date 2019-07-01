@@ -44,61 +44,143 @@ class Wpml {
 	}
 
 	/**
-	* Switches wpml global language for rest requests from post-edit.
-	* Determinates new language based on referer language.
+	* Setup hooks to switch wpml global language for taxonomy and post rest requests.
+	*
+	* Hooks into taxonomy and post_type registration filter
+	* to hook `self::_rest_query_switch_lang` into each `rest_{$object}_query` filter.
+	* The `rest_{$object}_query` filter has access to the request.
+	* The language will be determinated based on the requests referer language.
 	*
 	* Fix this issue https://wpml.org/forums/topic/gutenberg-editor-sidebar-taxonomy-panels-load-wrong-language/
 	*
-	* Can/Should be used in combination with `call_rest_switch_language_by_tax`
-	* to hook into `rest_{$taxonomy}_query` for all taxonomies.
+	* Should be hooked early. Before post_types or taxonomies are registered.
+	* Themes can hook this into: `after_setup_theme`.
+	* Plugins can hook this into: `plugins_loaded`.
 	*
-	* @since 0.4.0
-	* @link https://developer.wordpress.org/reference/functions/get_terms/
-	* @param array             $prepared_args  Array of arguments to be passed to get_terms().
-	* @param WP_REST_Request   $request        The current request.
-	* @return array            $prepared_args  Returns $prepared_args unchanged.
+	* @since 0.5.1
 	*/
-	public static function rest_switch_language( $prepared_args, $request ) {
+	public static function rest_setup_switch_lang() {
 
-		// get lang from referer url
-		$referer = $request->get_headers()['referer'][0];
-		$parts = parse_url( $referer );
-		$query = array();
-		parse_str( $parts['query'], $query );
+		// taxonomies, hook `self::_rest_query_switch_lang` into rest_{$taxonomy}_query
+		add_filter( 'register_taxonomy_args', function( $args, $taxonomy, $object_type ) {
+			// // taxonomies will be registered:
+			// category
+			// post_tag
+			// nav_menu
+			// link_category
+			// post_format
+			// translation_priority
+			// ... plus custom
 
-		// get out if no lang
-		if ( ! array_key_exists( 'lang', $query ) )
-			return $prepared_args;
+			$exclude = array(
+				'translation_priority',
+			);
 
-		// is referer editor ? switch_language
-		if ( array_key_exists( 'action', $query ) && 'edit' === $query['action'] )
-			do_action( 'wpml_switch_language', $query['lang'] );
+			if ( ! in_array( $taxonomy, $exclude ) ) {
+				add_filter( "rest_{$taxonomy}_query", array( __CLASS__, '_rest_query_switch_lang' ), 1, 2 );
+			}
+			return $args;
+		}, 10, 3 );
 
-		return $prepared_args;
+		// post_types, hook `self::_rest_query_switch_lang` into rest_{$post_type}_query
+		add_filter( 'register_post_type_args', function( $args, $post_type ) {
+			// // post_types will be registered:
+			// post
+			// page
+			// attachment
+			// revision
+			// nav_menu_item
+			// custom_css
+			// customize_changeset
+			// oembed_cache
+			// user_request
+			// wp_block
+			// ... plus custom
+
+			$exclude = array(
+				'revision',
+				'nav_menu_item',
+				'custom_css',
+				'customize_changeset',
+				'oembed_cache',
+				'user_request',
+				'wp_block',
+			);
+
+			if ( ! in_array( $post_type, $exclude ) ) {
+				add_filter( "rest_{$post_type}_query", array( __CLASS__, '_rest_query_switch_lang' ), 1, 2 );
+			}
+			return $args;
+		}, 10, 2 );
+
 	}
 
 	/**
-	 * Fix WPML global active language variable for all taxonomy REST Requests.
-	 *
-	 * Hooks `rest_switch_language` method into `rest_{$taxonomy}_query`
-	 *
-	 * Hook this method into `register_taxonomy_args`.
-	 * @example: add_filter( 'register_taxonomy_args', array( 'croox\wde\utils\Wpml', 'call_rest_switch_language_by_tax' ), 10, 3 );
-	 *
-	 * @link https://developer.wordpress.org/reference/hooks/register_taxonomy_args/
-	 * @param array             $args           Array of arguments for registering a taxonomy.
-	 * @param string            $taxonomy       Taxonomy key.
-	 * @param array             $object_type    Array of names of object types for the taxonomy.
-	 * @return array            $args           Returns $args unchanged.
-	 */
-	public static function call_rest_switch_language_by_tax( $args, $taxonomy, $object_type ) {
-		global $wp_filter;
-
-		// hook rest_switch_language function into rest_{$taxonomy}_query
-		if ( ! array_key_exists( "rest_{$taxonomy}_query", $wp_filter ) )
-			add_filter( "rest_{$taxonomy}_query", array( __CLASS__, 'rest_switch_language' ), 10, 2 );
-
+	* Switches wpml global language before the rest query is set up.
+	*
+	* Hooked by `self::rest_setup_switch_lang`
+	*
+	* @since 0.5.1
+	* @param array             $args  		Array of arguments to be passed to query.
+	* @param WP_REST_Request   $request     The current request.
+	* @return array            $args 		Returns $args unchanged.
+	*/
+	public static function _rest_query_switch_lang( $args, $request ) {
+		self::_rest_request_switch_lang( $request );
 		return $args;
+	}
+
+	/**
+	 * Switches wpml global language to the requests referer language.
+	 *
+	 * @todo ??? Doesn't work if a different domain is used per language.
+	 * @since 0.5.1
+	 * @param WP_REST_Request	$request	The request used.
+	 */
+	public static function _rest_request_switch_lang( $request ){
+
+		$language_negotiation_type = apply_filters( 'wpml_setting', false, 'language_negotiation_type' );
+		// '1': Different languages in directories.
+		// '2': A different domain per language.
+		// '3': Language name added as a parameter.
+
+		$referer =  parse_url( $request->get_headers()['referer'][0] );
+		$is_admin = array_key_exists( 'path', $referer ) && 'wp-admin' === explode( '/', $referer['path'] )[1];
+
+		if (
+			( $is_admin || '3' === $language_negotiation_type )
+			&& array_key_exists( 'query', $referer )
+		) {
+			$query = array();
+			parse_str( $referer['query'], $query );
+			if ( array_key_exists( 'lang', $query ) ) {
+				return do_action( 'wpml_switch_language', $query['lang'] );
+			}
+		}
+
+		if ( '2' === $language_negotiation_type ) {
+			/// ??? missing
+			return;	// do nothing
+		}
+
+		if (
+			'1' === $language_negotiation_type
+			&& array_key_exists( 'path', $referer )
+		) {
+			$maybe_lang = explode( '/', $referer['path'] )[1];
+			$active_langs = array_map( function( $lang ) {
+				return $lang['language_code'];
+			}, apply_filters( 'wpml_active_languages', NULL, array( 'skip_missing' => 0 ) ) );
+
+			if ( in_array( $maybe_lang, $active_langs ) ) {
+				return do_action( 'wpml_switch_language', $maybe_lang );
+			}
+		}
+
+		if ( ! $is_admin ) {
+			return do_action( 'wpml_switch_language', apply_filters( 'wpml_default_language', NULL ) );
+		}
+
 	}
 
 }
