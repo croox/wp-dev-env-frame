@@ -338,8 +338,8 @@ abstract class Project {
 		if ( ! array_key_exists( 'localize_name', $args ) )
 			$args['localize_name'] = $args['handle'] . '_data';
 
-		$_src = '/js/' . $args['handle'] . '.min.js';
-		$src = $this->dir_url . $_src;
+		$_src = 'js/' . $args['handle'] . '.min.js';
+		$src = $this->dir_url . '/' . $_src;
 		$ver = $this->version . '.' . filemtime( $this->dir_path . $_src );
 
 		$registered = wp_register_script(
@@ -402,8 +402,8 @@ abstract class Project {
 			'enqueue'	=> false,
 		) );
 
-		$_src = '/css/' . $args['handle'] . '.min.css';
-		$src = $this->dir_url . $_src;
+		$_src = 'css/' . $args['handle'] . '.min.css';
+		$src = $this->dir_url . '/' . $_src;
 		$ver = $this->version . '.' . filemtime( $this->dir_path . $_src );
 
 		$registered = wp_register_style(
