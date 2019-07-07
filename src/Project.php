@@ -300,6 +300,127 @@ abstract class Project {
 
 	abstract public function deactivate();
 
+	/**
+	 * Helper to register, localize, set translations and enqueue a script from the projects `js` directory.
+	 *
+	 * - Uses `register_script` function.
+	 *   Specifies the script version, using the project version and the script file modification time.
+	 * - If `$args['localize_data']` is not empty, the script will be localized.
+	 * - If `$deps` contains `wp-i18n`, script translations will be set..
+	 *
+	 * @since 0.6.0
+	 * @param array  $args      Arguments array
+	 *    $args = array(
+	 *      'handle'		=> 	(string)	(Required)
+	 *							Name of the script. Should be unique.
+	 *      'deps'			=> 	(array)	(Optional)
+	 *							An array of registered script handles this script depends on. Default `array()`.
+	 *      'in_footer'     => 	(bool)	(Optional)
+	 *							Whether to enqueue the script before `</body>` instead of in the `<head>`. Default `false`.
+	 *      'localize_data'	=> 	(array)	(Optional)
+	 *							Data to be available to the script. If empty, script won't be localized. Default `array()`.
+	 *      'localize_name'	=> 	(string)	(Optional)
+	 *							The name of the variable which will contain the localized data. Default `$args['handle'] . '_data'`.
+	 *      'enqueue'		=> 	(int) 	(Optional)
+	 *							Whether to enqueue the script directly or not. Default `false`.
+	 *    )
+	 * @return bool       		Whether the script has been registered. True on success, false on failure.
+	 */
+	public function register_script( $args ) {
+
+		$args = wp_parse_args( $args, array(
+			'handle'		=> '',
+			'deps'			=> array(),
+			'in_footer'		=> false,
+			'localize_data'	=> array(),
+			'enqueue'		=> false,
+		) );
+		if ( ! array_key_exists( 'localize_name', $args ) )
+			$args['localize_name'] = $args['handle'] . '_data';
+
+		$_src = '/js/' . $args['handle'] . '.min.js';
+		$src = $this->dir_url . $_src;
+		$ver = $this->version . '.' . filemtime( $this->dir_path . $_src );
+
+		$registered = wp_register_script(
+			$args['handle'],
+			$src,
+			$args['deps'],
+			$ver,
+			$args['in_footer']
+		);
+
+		if ( ! $registered )
+			return $registered;
+
+		if ( ! empty( $args['localize_data'] ) )
+			wp_localize_script(
+				$args['handle'],
+				$args['localize_name'],
+				$args['localize_data']
+			);
+
+		if ( in_array( 'wp-i18n', $args['deps'] ) )
+			wp_set_script_translations(
+				$args['handle'],
+				$this->textdomain,
+				$this->dir_path . 'languages'
+			);
+
+		if ( $args['enqueue'] )
+			wp_enqueue_script( $args['handle'] );
+
+		return $registered;
+	}
+
+	/**
+	 * Helper to register a stylesheet from the projects `css` directory.
+	 *
+	 * - Uses `register_style` function.
+	 *   Specifies the stylesheet version, using the project version and the stylesheet file modification time.
+	 *
+	 * @since 0.6.0
+	 * @param array  $args      Arguments array
+	 *    $args = array(
+	 *      'handle'		=> 	(string)	(Required)
+	 *							Name of the script. Should be unique.
+	 *      'deps'			=> 	(array)	(Optional)
+	 *							An array of registered script handles this script depends on. Default `array()`.
+	 *      'media'			=> 	(string)	(Optional)
+	 *							String specifying the media for which this stylesheet has been defined. Default `'all'`.
+	 *      'enqueue'		=> 	(int) 	(Optional)
+	 *							Whether to enqueue the stylesheet directly or not. Default `false`.
+	 *    )
+	 * @return bool       		Whether the stylesheet has been registered. True on success, false on failure.
+	 */
+	public function register_style( $args ) {
+
+		$args = wp_parse_args( $args, array(
+			'handle'	=> '',
+			'deps'		=> array(),
+			'media'		=> 'all',
+			'enqueue'	=> false,
+		) );
+
+		$_src = '/css/' . $args['handle'] . '.min.css';
+		$src = $this->dir_url . $_src;
+		$ver = $this->version . '.' . filemtime( $this->dir_path . $_src );
+
+		$registered = wp_register_style(
+			$args['handle'],
+			$src,
+			$args['deps'],
+			$ver,
+			$args['media']
+		);
+
+		if ( $registered && $args['enqueue'] )
+			wp_enqueue_style( $args['handle'] );
+
+		return $registered;
+
+	}
+
 }
 
 
