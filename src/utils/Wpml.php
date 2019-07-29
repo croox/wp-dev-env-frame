@@ -144,15 +144,24 @@ class Wpml {
 		// '2': A different domain per language.
 		// '3': Language name added as a parameter.
 
-		$referer =  parse_url( $request->get_headers()['referer'][0] );
-		$is_admin = array_key_exists( 'path', $referer ) && 'wp-admin' === explode( '/', $referer['path'] )[1];
+		$referer_url = $request->get_headers()['referer'][0];
+		$referer_parsed = parse_url( $referer_url );
+		// Use path after site_url, instead of parsed url path.
+		$referer_path_arr = array_values( array_filter(
+			explode(
+				'/',
+				str_replace( site_url(), '', $referer_url
+			) ),
+			'strlen'
+		) );
+		$is_admin = 'wp-admin' === $referer_path_arr[0];
 
-		if (
-			( $is_admin || '3' === $language_negotiation_type )
-			&& array_key_exists( 'query', $referer )
-		) {
+		if ( $is_admin || '3' === $language_negotiation_type) {
+			if ( ! array_key_exists( 'query', $referer_parsed ) )
+				return;	// do nothing
+
 			$query = array();
-			parse_str( $referer['query'], $query );
+			parse_str( $referer_parsed['query'], $query );
 			if ( array_key_exists( 'lang', $query ) ) {
 				return do_action( 'wpml_switch_language', $query['lang'] );
 			}
@@ -163,11 +172,8 @@ class Wpml {
 			return;	// do nothing
 		}
 
-		if (
-			'1' === $language_negotiation_type
-			&& array_key_exists( 'path', $referer )
-		) {
-			$maybe_lang = explode( '/', $referer['path'] )[1];
+		if ( '1' === $language_negotiation_type ) {
+			$maybe_lang = $referer_path_arr[0];
 			$active_langs = array_map( function( $lang ) {
 				return $lang['language_code'];
 			}, apply_filters( 'wpml_active_languages', NULL, array( 'skip_missing' => 0 ) ) );
