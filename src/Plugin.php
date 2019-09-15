@@ -23,7 +23,6 @@ abstract class Plugin extends Project {
 			array()
 		);
 
-		// ??? is all exist and valid
 		$this->dir_basename = basename( dirname( $init_args['FILE_CONST'] ) );      // no trailing slash
 		$this->dir_url      = plugins_url( '', $init_args['FILE_CONST'] );          // no trailing slash
 		$this->dir_path     = plugin_dir_path( $init_args['FILE_CONST'] );          // trailing slash
@@ -39,6 +38,7 @@ abstract class Plugin extends Project {
 		register_deactivation_hook( __FILE__, array( $this, 'on_deactivate' ) );
 		register_uninstall_hook( __FILE__, array( __CLASS__, 'on_uninstall' ) );
 		add_action( 'plugins_loaded', array( $this, 'start' ), 9 );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 20, 2 );
 	}
 
 	public function load_textdomain() {
@@ -97,12 +97,54 @@ abstract class Plugin extends Project {
 		} else {
 			add_action( 'admin_init', array( $this, 'deactivate' ) );
 		}
-
 	}
 
 	public function deactivate() {
 		add_action( 'admin_notices', array( $this, 'the_deactivate_notice' ) );
 		deactivate_plugins( plugin_basename( __FILE__ ) );
+	}
+
+	public function plugin_row_meta( $links, $file ) {
+		if ( implode( '/', array_slice( explode( '/', $this->FILE_CONST ), -2, 2, true) ) !== $file )
+			return $links;
+
+		if ( empty( $this->wde ) || ! method_exists( __NAMESPACE__ . '\Project', 'get_active_frame' ) )
+			return $links;
+
+		$active_frame = Project::get_active_frame();
+
+		$links[] = '<span>wp-dev-env</span>: ' . implode( ' ', array_map( function( $module, $version ) use ( $active_frame ){
+			switch( $module ) {
+				case 'generator-wp-dev-env':
+					$link = 'https://github.com/croox/generator-wp-dev-env';
+					break;
+				case 'wp-dev-env-grunt':
+					$link = 'https://github.com/croox/wp-dev-env-grunt';
+					break;
+				case 'wp-dev-env-frame':
+					$link = 'https://github.com/croox/wp-dev-env-frame';
+					break;
+				default:
+					$link = false;
+			}
+
+			return implode( '', array(
+				'<span>',
+					$link ? '<a href="' . $link . '" target="_blank" title="' . $module . '">' : '',
+						str_replace( 'wp-dev-env-', '', str_replace( '-wp-dev-env', '', $module ) ),
+					$link ? '</a>' : '',
+				'</span> ',
+				'<span ',
+					'wp-dev-env-frame' === $module && $active_frame['version'] !== $version
+						? 'style="color: #a00;" title="Acitve: ' . $active_frame['version'] . '; ' . $active_frame['path'] . '" '
+						: '' ,
+				'>',
+					$version,
+				'</span>',
+			) );
+		}, array_keys( $this->wde ), $this->wde ) );
+
+		return $links;
 	}
 
 }

@@ -63,15 +63,14 @@ abstract class Project {
 		if ( array_key_exists( 'wp_version', $init_args['deps'] ) && is_string( $init_args['deps']['wp_version'] ) )
 			$deps['wp_version'] = $init_args['deps']['wp_version'];
 
-		// ??? is all exist and valid
 		$this->deps       = $deps;
-		$this->version    = $init_args['version'];
-		$this->db_version = $init_args['db_version'];
-		$this->slug       = $init_args['slug'];
-		$this->name       = $init_args['name'];
-		$this->prefix     = $init_args['prefix'];
-		$this->textdomain = $init_args['textdomain'];
-
+		$this->version    = utils\Arr::get( $init_args, 'version', '' );
+		$this->db_version = utils\Arr::get( $init_args, 'db_version', '' );
+		$this->slug       = utils\Arr::get( $init_args, 'slug', '' );
+		$this->name       = utils\Arr::get( $init_args, 'name', '' );
+		$this->prefix     = utils\Arr::get( $init_args, 'prefix', '' );
+		$this->textdomain = utils\Arr::get( $init_args, 'textdomain', '' );
+		$this->wde        = utils\Arr::get( $init_args, 'wde', array() );
 	}
 
 	public function hooks() {}
@@ -419,6 +418,22 @@ abstract class Project {
 
 		return $registered;
 
+	}
+
+	public static function get_active_frame() {
+		$composer_json_path = explode( '/', dirname( __FILE__ ) );
+		array_splice( $composer_json_path, -1 );
+		$composer_json_path = implode( '/', $composer_json_path );
+
+		$composer_json = json_decode( file_get_contents( $composer_json_path . '/composer.json' ), true );
+		$composer_json = null === $composer_json ? array() : $composer_json;
+
+		$active_frame = array(
+			'version'	=> utils\Arr::get( $composer_json, 'version', '' ),
+			'path'		=> $composer_json_path,
+		);
+
+		return $active_frame;
 	}
 
 }
