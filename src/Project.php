@@ -63,17 +63,20 @@ abstract class Project {
 		if ( array_key_exists( 'wp_version', $init_args['deps'] ) && is_string( $init_args['deps']['wp_version'] ) )
 			$deps['wp_version'] = $init_args['deps']['wp_version'];
 
-		$this->deps       = $deps;
-		$this->version    = utils\Arr::get( $init_args, 'version', '' );
-		$this->db_version = utils\Arr::get( $init_args, 'db_version', '' );
-		$this->slug       = utils\Arr::get( $init_args, 'slug', '' );
-		$this->name       = utils\Arr::get( $init_args, 'name', '' );
-		$this->prefix     = utils\Arr::get( $init_args, 'prefix', '' );
-		$this->textdomain = utils\Arr::get( $init_args, 'textdomain', '' );
-		$this->wde        = utils\Arr::get( $init_args, 'wde', array() );
+		$this->deps       	= $deps;
+		$this->version    	= utils\Arr::get( $init_args, 'version', '' );
+		$this->db_version 	= utils\Arr::get( $init_args, 'db_version', '' );
+		$this->slug      	= utils\Arr::get( $init_args, 'slug', '' );
+		$this->name      	= utils\Arr::get( $init_args, 'name', '' );
+		$this->prefix     	= utils\Arr::get( $init_args, 'prefix', '' );
+		$this->textdomain 	= utils\Arr::get( $init_args, 'textdomain', '' );
+		$this->wde        	= utils\Arr::get( $init_args, 'wde', array() );
+		$this->project_kind	= utils\Arr::get( $init_args, 'project_kind', '' );
 	}
 
-	public function hooks() {}
+	public function hooks() {
+		add_filter( 'admin_init', array( $this, 'may_be_admin_notices' ) );
+	}
 
 	protected function init_options() {
 		update_option( $this->prefix . '_version', $this->version );
@@ -434,6 +437,42 @@ abstract class Project {
 		);
 
 		return $active_frame;
+	}
+
+	public function may_be_admin_notices() {
+		if ( ! isset( $this->wde ) || empty( $this->wde ) )
+			return;
+
+		$required_frame = utils\Arr::get( $this->wde, 'wp-dev-env-frame', '' );
+		$active_frame = Project::get_active_frame();
+
+		if ( $active_frame['version'] !== $required_frame ) {
+			add_action( 'admin_notices', function() use( $required_frame, $active_frame ) {
+				echo implode( '', array(
+					'<div class="notice notice-error is-dismissible">',
+
+						'<p>' . sprintf(
+							__( '%s <b>%s</b> requires <b>%s</b> version <b>%s</b>.', $this->textdomain ),
+							ucfirst( $this->project_kind ),
+							$this->name,
+							'croox/wp-dev-env-frame',
+							$required_frame
+						) . '</p>',
+
+						'<p>' . sprintf(
+							__( "But version <b>%s</b> is loaded. This might be compatible but propably won't. The only safe way is to have all plugins and themes running the same frame version.", $this->textdomain ),
+							$active_frame['version']
+						) . '</p>',
+
+						'<p>' . sprintf(
+							__( 'The frame package is loaded from this path: %s', $this->textdomain ),
+							$active_frame['path']
+						) . '</p>',
+
+					'</div>',
+				) );
+			} );
+		}
 	}
 
 }

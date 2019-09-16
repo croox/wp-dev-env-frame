@@ -33,16 +33,16 @@ abstract class Theme extends Project {
 	}
 
 	public function initialize() {
-
 		// activate
 		$this->activate();
-
 		// start
 		$this->start();
+	}
 
+	public function hooks() {
+		parent::hooks();
 		// on deactivate
 		add_action( 'switch_theme', array( $this, 'on_deactivate' ), 10, 3 );
-
 	}
 
 	public function load_textdomain() {
