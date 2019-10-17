@@ -144,7 +144,11 @@ class Wpml {
 		// '2': A different domain per language.
 		// '3': Language name added as a parameter.
 
-		$referer_url = $request->get_headers()['referer'][0];
+		$referer_url = Arr::get( $request->get_headers(), 'referer.0', false );
+		if ( ! $referer_url ) { // probably internal request
+			return;
+		}
+
 		$referer_parsed = parse_url( $referer_url );
 		// Use path after site_url, instead of parsed url path.
 		$referer_path_arr = array_values( array_filter(
