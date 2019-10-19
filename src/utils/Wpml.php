@@ -126,6 +126,15 @@ class Wpml {
 	* @return array            $args 		Returns $args unchanged.
 	*/
 	public static function _rest_query_switch_lang( $args, $request ) {
+		$params = $request->get_params();
+
+		// Do not switch language, if lang parameter already set
+		if ( array_key_exists( 'lang', $params )
+			|| array_key_exists( 'wpml_language', $params )
+		) {
+			return $args;
+		}
+
 		self::_rest_request_switch_lang( $request );
 		return $args;
 	}
