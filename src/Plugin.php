@@ -73,10 +73,8 @@ abstract class Plugin extends Project {
 
 	/*
 	 *
-	 * Doesn't have any parameters.
-	 * The Method inheritates from an abstract parent method, but actually no parameters will be passed.
 	 */
-	public function on_deactivate( $new_name, $new_theme, $old_theme ) {
+	public function on_deactivate() {
 		$this->add_roles_and_capabilities();
 		do_action( $this->prefix . '_on_deactivate_before_flush' );
 		flush_rewrite_rules();
