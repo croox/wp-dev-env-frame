@@ -298,7 +298,10 @@ abstract class Project {
 
 	abstract public function start();
 
-	abstract public function on_deactivate( $new_name, $new_theme, $old_theme );
+	// // Needs to be overwritten! But can't declare it here.
+	// // Themes will pass 3 args on switch_theme.
+	// // And Plugins will pass 0 args on register_deactivation_hook.
+	// abstract public function on_deactivate( $new_name, $new_theme, $old_theme );
 
 	abstract public function deactivate();
 

@@ -34,9 +34,9 @@ abstract class Plugin extends Project {
 	}
 
 	public function hooks() {
-		register_activation_hook( __FILE__, array( $this, 'activate' ) );
-		register_deactivation_hook( __FILE__, array( $this, 'on_deactivate' ) );
-		register_uninstall_hook( __FILE__, array( __CLASS__, 'on_uninstall' ) );
+		register_activation_hook( $this->FILE_CONST, array( $this, 'activate' ) );
+		register_deactivation_hook( $this->FILE_CONST, array( $this, 'on_deactivate' ) );
+		register_uninstall_hook( $this->FILE_CONST, array( __CLASS__, 'on_uninstall' ) );
 		add_action( 'plugins_loaded', array( $this, 'start' ), 9 );
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 20, 2 );
 	}
@@ -101,7 +101,7 @@ abstract class Plugin extends Project {
 
 	public function deactivate() {
 		add_action( 'admin_notices', array( $this, 'the_deactivate_notice' ) );
-		deactivate_plugins( plugin_basename( __FILE__ ) );
+		deactivate_plugins( plugin_basename( $this->FILE_CONST ) );
 	}
 
 	public function plugin_row_meta( $links, $file ) {
