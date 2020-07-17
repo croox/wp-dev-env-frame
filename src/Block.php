@@ -30,6 +30,8 @@ abstract class Block {
 	// Block type name excluding namespace
 	protected $name = '';
 
+	protected $attributes;
+
 	protected $handles = array();
 
 	public static function get_instance() {
@@ -60,6 +62,8 @@ abstract class Block {
 		);
 
 		$this->project_class_name = '';			// Set the project class name!
+
+		$this->attributes = array();			// Define block attributes here and they'll be localized.
 	}
 
 	/**
@@ -123,6 +127,9 @@ abstract class Block {
 			if ( method_exists( $this, 'render' ) )
 				$args = array_merge( $args, array( 'render_callback' => array( $this, 'render' ) ) );
 
+			if ( $this->attributes && ! empty( $this->attributes ) )
+				$args = array_merge( $args, array( 'attributes' => $this->attributes ) );
+
 			register_block_type( $block_type_name, $args );
 		}
 	}
@@ -138,7 +145,8 @@ abstract class Block {
 		$handle = $this->get_handle( 'script_admin' );
 		if ( ! $handle || ! method_exists( $this->project_class_name, 'register_script' ) )
 			return;
-		$this->project_class_name::get_instance()->register_script( array(
+
+		$args = array(
 			'handle'		=> $handle,
 			'deps'			=> array(
 				'wp-blocks',
@@ -146,10 +154,21 @@ abstract class Block {
 				'wp-element',
 				'wp-edit-post'
 			),
-			// 'localize_data'	=> array(),
 			'in_footer'		=> true,
 			'enqueue'		=> true,
-		) );
+		);
+
+		$localize_data = array();
+
+		if ( $this->attributes && ! empty( $this->attributes ) ) {
+			$localize_data = array_merge( $localize_data, array( 'attributes'	=> $this->attributes ) );
+		}
+
+		if ( ! empty( $localize_data ) ) {
+			$args = array_merge( $args, array( 'localize_data'	=> $localize_data ) );
+		}
+
+		$this->project_class_name::get_instance()->register_script( $args );
 	}
 
 	/**
