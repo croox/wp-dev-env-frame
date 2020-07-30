@@ -130,6 +130,12 @@ abstract class Block {
 			if ( $this->attributes && ! empty( $this->attributes ) )
 				$args = array_merge( $args, array( 'attributes' => $this->attributes ) );
 
+			if ( $this->supports && ! empty( $this->supports ) ) {
+				$args = array_merge( $args, array( 'supports' => $this->supports ) );
+			} else {
+				$args = array_merge( $args, array( 'supports' => array() ) );
+			}
+
 			register_block_type( $block_type_name, $args );
 		}
 	}
@@ -162,6 +168,12 @@ abstract class Block {
 
 		if ( $this->attributes && ! empty( $this->attributes ) ) {
 			$localize_data = array_merge( $localize_data, array( 'attributes'	=> $this->attributes ) );
+		}
+
+		if ( $this->supports && ! empty( $this->supports ) ) {
+			$localize_data = array_merge( $localize_data, array( 'supports'	=> $this->supports ) );
+		} else {
+			$localize_data = array_merge( $localize_data, array( 'supports'	=> array() ) );
 		}
 
 		if ( ! empty( $localize_data ) ) {
