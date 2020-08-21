@@ -82,7 +82,7 @@ abstract class Plugin extends Project {
 	}
 
 	public static function on_uninstall() {
-		do_action( $this->prefix . '_plugin_uninstalled' );
+		// ... silence
 	}
 
 	public function start() {
