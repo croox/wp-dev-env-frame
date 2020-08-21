@@ -127,10 +127,10 @@ abstract class Block {
 			if ( method_exists( $this, 'render' ) )
 				$args = array_merge( $args, array( 'render_callback' => array( $this, 'render' ) ) );
 
-			if ( $this->attributes && ! empty( $this->attributes ) )
+			if ( property_exists( $this, 'attributes' ) && $this->attributes && ! empty( $this->attributes ) )
 				$args = array_merge( $args, array( 'attributes' => $this->attributes ) );
 
-			if ( $this->supports && ! empty( $this->supports ) ) {
+			if ( property_exists( $this, 'supports' ) && $this->supports && ! empty( $this->supports ) ) {
 				$args = array_merge( $args, array( 'supports' => $this->supports ) );
 			} else {
 				$args = array_merge( $args, array( 'supports' => array() ) );
@@ -154,31 +154,11 @@ abstract class Block {
 
 		$args = array(
 			'handle'		=> $handle,
-			'deps'			=> array(
-				'wp-blocks',
-				'wp-i18n',
-				'wp-element',
-				'wp-edit-post'
-			),
+			'deps'			=> $this->get_script_deps_editor(),
 			'in_footer'		=> true,
 			'enqueue'		=> true,
+			'localize_data'	=> $this->get_localize_data_editor(),
 		);
-
-		$localize_data = array();
-
-		if ( $this->attributes && ! empty( $this->attributes ) ) {
-			$localize_data = array_merge( $localize_data, array( 'attributes'	=> $this->attributes ) );
-		}
-
-		if ( $this->supports && ! empty( $this->supports ) ) {
-			$localize_data = array_merge( $localize_data, array( 'supports'	=> $this->supports ) );
-		} else {
-			$localize_data = array_merge( $localize_data, array( 'supports'	=> array() ) );
-		}
-
-		if ( ! empty( $localize_data ) ) {
-			$args = array_merge( $args, array( 'localize_data'	=> $localize_data ) );
-		}
 
 		$this->project_class_name::get_instance()->register_script( $args );
 	}
@@ -196,8 +176,8 @@ abstract class Block {
 			return;
 		$this->project_class_name::get_instance()->register_script( array(
 			'handle'		=> $handle,
-			// 'deps'			=> array(),
-			// 'localize_data'	=> array(),
+			'deps'			=> $this->get_script_deps_frontend(),
+			'localize_data'	=> $this->get_localize_data_frontend(),
 			'in_footer'		=> true,
 			'enqueue'		=> true,
 		) );
@@ -217,7 +197,7 @@ abstract class Block {
 
 		$this->project_class_name::get_instance()->register_style( array(
 			'handle'	=> $handle,
-			'deps'		=> array( 'wp-edit-blocks' ),
+			'deps'		=> $this->get_style_deps_editor(),
 			// 'media'		=> 'all',
 			'enqueue'	=> true,
 		) );
@@ -237,10 +217,62 @@ abstract class Block {
 
 		$this->project_class_name::get_instance()->register_style( array(
 			'handle'	=> $handle,
-			// 'deps'		=> array(),
+			'deps'		=> $this->get_style_deps_frontend(),
 			// 'media'		=> 'all',
 			'enqueue'	=> true,
 		) );
+	}
+
+	protected function get_script_deps_editor( $deps = array() ) {
+		$prefix = $this->project_class_name::get_instance()->prefix;
+
+		$deps = array(
+			'wp-blocks',
+			'wp-i18n',
+			'wp-element',
+			'wp-edit-post'
+		);
+
+		return apply_filters( "{$prefix}_block_{$this->name}_script_deps_editor", $deps );
+	}
+
+	protected function get_localize_data_editor( $localize_data = array() ) {
+		$prefix = $this->project_class_name::get_instance()->prefix;
+
+		if ( property_exists( $this, 'attributes' ) && $this->attributes && ! empty( $this->attributes ) ) {
+			$localize_data = array_merge( $localize_data, array( 'attributes'	=> $this->attributes ) );
+		}
+
+		if ( property_exists( $this, 'supports' ) && $this->supports && ! empty( $this->supports ) ) {
+			$localize_data = array_merge( $localize_data, array( 'supports'	=> $this->supports ) );
+		} else {
+			$localize_data = array_merge( $localize_data, array( 'supports'	=> array() ) );
+		}
+
+		return apply_filters( "{$prefix}_block_{$this->name}_localize_data_editor", $localize_data );
+	}
+
+	protected function get_script_deps_frontend( $deps = array() ) {
+		$prefix = $this->project_class_name::get_instance()->prefix;
+		return apply_filters( "{$prefix}_block_{$this->name}_script_deps_frontend", $deps );
+	}
+
+	protected function get_localize_data_frontend( $localize_data = array() ) {
+		$prefix = $this->project_class_name::get_instance()->prefix;
+		return apply_filters( "{$prefix}_block_{$this->name}_localize_data_frontend", $localize_data );
+	}
+
+	protected function get_style_deps_editor( $deps = array() ) {
+		$prefix = $this->project_class_name::get_instance()->prefix;
+		$deps = array(
+			'wp-edit-blocks'
+		);
+		return apply_filters( "{$prefix}_block_{$this->name}_style_deps_editor", $deps );
+	}
+
+	protected function get_style_deps_frontend( $deps = array() ) {
+		$prefix = $this->project_class_name::get_instance()->prefix;
+		return apply_filters( "{$prefix}_block_{$this->name}_style_deps_frontend", $deps );
 	}
 
 	/**
