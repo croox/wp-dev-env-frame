@@ -36,6 +36,8 @@ abstract class Block {
 
 	protected $handles = array();
 
+	protected $hook_priorities = array();
+
 	public static function get_instance() {
 		$class = get_called_class();
 		if ( ! isset( self::$_instances[ $class ] ) ) {
@@ -48,6 +50,7 @@ abstract class Block {
 	function __construct() {
 		$this->initialize();
 		$this->setup_handles();
+		$this->set_hook_priorities();
 		$this->hooks();
 	}
 
@@ -86,18 +89,26 @@ abstract class Block {
 		);
 	}
 
+	protected function set_hook_priorities() {
+		$this->hook_priorities = array(
+			'style_admin'     => 10,
+			'script_admin'    => 10,
+			'style_frontend'  => 10,
+			'script_frontend' => 10,
+		);
+	}
+
 	/**
 	 * Initiate our hooks
 	 * @since  	0.7.0
 	 */
 	public function hooks() {
-
 		add_action( 'init', array( $this, 'register_block' ) );
 
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_style_admin' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_script_admin' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_script_frontend' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_style_frontend' ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_style_admin' ), Arr::get( $this->hook_priorities, 'style_admin', 10 ) );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_script_admin' ), Arr::get( $this->hook_priorities, 'script_admin', 10 ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_style_frontend' ), Arr::get( $this->hook_priorities, 'style_frontend', 10 ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_script_frontend' ), Arr::get( $this->hook_priorities, 'script_frontend', 10 ) );
 	}
 
 	/**
