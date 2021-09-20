@@ -7,7 +7,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-use wde\utils\Arr;
+use croox\wde\utils\Arr;
 
 /**
  * Base class for Blocks. Registers a Block and enqueues the assets.
