@@ -59,6 +59,7 @@ class List_Table_Meta_Column {
 
 			// render column
 			$render_cb = is_string( $this->column['render_cb'] ) && ! empty( $this->column['render_cb'] )
+				|| ( is_array( $this->column['render_cb'] ) && 2 === count( $this->column['render_cb'] ) )
 				? $this->column['render_cb']
 				: array( $this, 'render_column' );
 			add_action( 'manage_' . $post_type . '_posts_custom_column', $render_cb, 10, 2 );
@@ -68,6 +69,7 @@ class List_Table_Meta_Column {
 				add_filter( 'manage_edit-' . $post_type . '_sortable_columns', array( $this, 'make_column_sortable' ) );
 
 				$order_by_cb = is_string( $this->column['order_by_cb'] ) && ! empty( $this->column['order_by_cb'] )
+					|| ( is_array( $this->column['order_by_cb'] ) && 2 === count( $this->column['order_by_cb'] ) )
 					? $this->column['order_by_cb']
 					: array( $this, 'order_by' );
 				add_action( 'pre_get_posts', $order_by_cb );
