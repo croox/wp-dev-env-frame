@@ -97,8 +97,11 @@ class List_Table_Meta_Column {
 
 	public function render_column( $column, $post_id ) {
 		if( $column === $this->column['key'] ) {
-			if ( is_string( $this->column['render_inner_cb'] ) && ! empty( $this->column['render_inner_cb'] ) ) {
-				$this->column['render_inner_cb']( $column, $post_id, $this );
+			if (
+				( is_string( $this->column['render_inner_cb'] ) && ! empty( $this->column['render_inner_cb'] ) )
+				|| ( is_array( $this->column['render_inner_cb'] ) && 2 === count( $this->column['render_inner_cb'] ) )
+			) {
+				call_user_func_array( $this->column['render_inner_cb'] , array( $column, $post_id, $this ) );
 			} else {
 				echo get_post_meta( $post_id, $this->column['metakey'], true );
 			}
@@ -118,9 +121,11 @@ class List_Table_Meta_Column {
 		$orderby = $query->get( 'orderby');
 
 		if( $this->column['metakey'] === $orderby ) {
-
-			if ( is_string( $this->column['order_by_inner_cb'] ) && ! empty( $this->column['order_by_inner_cb'] ) ) {
-				$this->column['order_by_inner_cb']( $query, $this );
+			if (
+				( is_string( $this->column['order_by_inner_cb'] ) && ! empty( $this->column['order_by_inner_cb'] ) )
+				|| ( is_array( $this->column['order_by_inner_cb'] ) && 2 === count( $this->column['order_by_inner_cb'] ) )
+			) {
+				call_user_func_array( $this->column['order_by_inner_cb'] , array( $query, $this ) );
 			} else {
 				$query->set( 'meta_key', $this->column['metakey'] );
 				$query->set( 'orderby', 'meta_value_num' );
