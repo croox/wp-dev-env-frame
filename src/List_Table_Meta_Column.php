@@ -24,6 +24,7 @@ class List_Table_Meta_Column {
 			'metakey' => '',				// required
 			'sortable' => false,
 			'insert_after' => 'title',
+			'add_column_priority' => 10,
 			'order_by_cb' => null,			// optional custom order_by callback
 			'order_by_inner_cb' => null,	// optional custom order_by inner callback
 			'render_cb' => null,			// optional custom render callback
@@ -55,7 +56,7 @@ class List_Table_Meta_Column {
 		foreach( $this->post_types as $post_type ){
 
 			// add column
-			add_filter( 'manage_' . $post_type . '_posts_columns', array( $this, 'add_column' ) );
+			add_filter( 'manage_' . $post_type . '_posts_columns', array( $this, 'add_column' ), intval( $this->column['add_column_priority'], 10 ) );
 
 			// render column
 			$render_cb = is_string( $this->column['render_cb'] ) && ! empty( $this->column['render_cb'] )
