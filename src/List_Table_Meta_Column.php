@@ -88,11 +88,18 @@ class List_Table_Meta_Column {
 			$this->column['insert_after'] = 'title';
 		}
 
+		$inserted = false;
 		foreach ( $columns as $key => $value ) {
 			$new_columns[ $key ] = $value;
 			if ( $key === $this->column['insert_after'] ) {
 				$new_columns[$this->column['key']] = $this->column['title'];
+				$inserted = true;
 			}
+		}
+
+		if ( ! $inserted ) {
+			$new_columns[$this->column['key']] = $this->column['title'];
+			$inserted = true;
 		}
 
 		return $new_columns;
