@@ -80,7 +80,7 @@ abstract class Project {
 
 	protected function init_options() {
 		update_option( $this->prefix . '_version', $this->version );
-		add_option( $this->prefix . '_db_version', $this->db_version );
+		update_option( $this->prefix . '_db_version', $this->db_version );
 	}
 
 	/**
@@ -189,14 +189,20 @@ abstract class Project {
 
 			// maybe set deactivate_notice and return false
 			if ( count( $error_msgs ) > 0 ) {
+				$error_msgs = array_map( function( $index ) use ( $error_msgs ) {
+					if ( count( $error_msgs ) - 1 == $index ) {
+						return $error_msgs[$index] . '. ';
+					} else {
+						return $error_msgs[$index] . ', ';
+					}
+				}, array_keys( $error_msgs ) );
+
 				$this->deactivate_notice = implode(
 					'',
 					array(
 						'<h3>',
-						$this->name,
-						' ',
-						$this->project_kind,
-						' requires:</h3>',
+						sprintf( '%s %s requires: ', $this->name, $this->project_kind ),
+						'</h3>',
 						'<ul style="padding-left: 1em; list-style: inside disc;">',
 						'<li>',
 						implode( '</li><li>', $error_msgs ),
@@ -303,31 +309,41 @@ abstract class Project {
 	abstract public function load_textdomain();
 
 	public function the_deactivate_notice() {
-		echo implode(
+		$notice = implode(
 			'',
 			array(
 				'<div class="notice error">',
 				$this->deactivate_notice,
-				'<p>The ',
-				$this->project_kind,
-				' will be deactivated.</p>',
+				'<p>',
+				sprintf(
+					'The %s will be deactivated.',
+					$this->project_kind
+				),
+				'</p>',
 				'</div>',
 			)
 		);
+		error_log( strip_tags( $notice ) );
+		echo $notice;
 	}
 
 	public function the_deactivate_error_notice() {
-		echo implode(
+		$notice = implode(
 			'',
 			array(
 				'<div class="notice error">',
 				$this->deactivate_notice,
-				'<p>An error occurred when deactivating the ',
-				$this->project_kind,
-				'. It needs to be deactivated manually.</p>',
+				'<p>',
+				sprintf(
+					'An error occurred when deactivating the %s. It needs to be deactivated manually.',
+					$this->project_kind
+				),
+				'</p>',
 				'</div>',
 			)
 		);
+		error_log( strip_tags( $notice ) );
+		echo $notice;
 	}
 
 	abstract public function activate();

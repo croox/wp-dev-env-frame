@@ -63,9 +63,10 @@ abstract class Plugin extends Project {
 			do_action( $this->prefix . '_plugin_activated' );
 		} else {
 			add_action( 'admin_init', array( $this, 'deactivate' ) );
+			$notice = $this->deactivate_notice . '<p>The plugin will not be activated.</p>';
+			error_log( strip_tags( $notice ) );
 			wp_die(
-				$this->deactivate_notice
-				. '<p>The plugin will not be activated.</p>'
+				$notice
 				. '<p><a href="' . admin_url( 'plugins.php' ) . '">&laquo; Return to Plugins</a></p>'
 			);
 		}
