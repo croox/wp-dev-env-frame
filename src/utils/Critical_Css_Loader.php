@@ -32,7 +32,11 @@ class Critical_Css_Loader {
                 'critical_css',
                 'critical' . ( wp_is_mobile() ? '-mobile' : '') . '.css',
             ) );
-            $this->filename = file_exists( $filename ) ? $filename : false;
+            $this->filename = file_exists( $filename )
+                && false !== filesize( $filename )
+                && filesize( $filename ) > 1
+                    ? $filename
+                    : false;
         }
     }
 
